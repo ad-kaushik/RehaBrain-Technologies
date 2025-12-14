@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RehaBrain Technologies</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+      color: #222;
+      background-color: #f7f9fc;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header {
+      background: #0b4f6c;
+      color: #fff;
+      padding: 60px 20px;
+      text-align: center;
+    }
+    header h1 {
+      margin-bottom: 10px;
+      font-size: 2.5rem;
+    }
+    header p {
+      font-size: 1.1rem;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+    section {
+      padding: 40px 20px;
+      max-width: 900px;
+      margin: auto;
+    }
+    .about, .contact {
+      background: #ffffff;
+      border-radius: 8px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    h2 {
+      color: #0b4f6c;
+      margin-bottom: 15px;
+    }
+    footer {
+      text-align: center;
+      padding: 20px;
+      background: #e9eef3;
+      font-size: 0.9rem;
+      margin-top: auto;
+    }
+    a {
+      color: #0b4f6c;
+      text-decoration: none;
+    }
+    
+        /* Neuron canvas background */
+    canvas#neuronCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      background: #f7f9fc;
+    }
+
+    header, section, footer {
+      position: relative;
+      z-index: 1;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="neuronCanvas"></canvas>
+
+  <header>
+    <h1>RehaBrain Technologies</h1>
+    <p>Reimagining Neuro-Rehabilitation.</p>
+  </header>
+
+  <section>
+    <div class="about">
+      <h2>About Us</h2>
+      <p>
+        RehaBrain Technologies LLP is a neuro-rehabilitation startup focused on developing innovative solutions for upper-limb motor recovery. We integrate neuroscience, engineering, and emerging technologies such as virtual reality (VR) to create engaging, data-driven rehabilitation systems for assessment and therapy. Founded by engineers from IIT Delhi, RehaBrain aims to bridge the gap between clinical rehabilitation needs and advanced technological interventions, enabling more effective, accessible, and patient-centric neuro-rehabilitation.
+      </p>
+    </div>
+
+    <div class="contact">
+      <h2>Contact Us</h2>
+      <p><strong>Email:</strong> <a href="mailto:info@rehabrain.in">info@rehabrain.in</a></p>
+      <p><strong>Location:</strong> India</p>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 RehaBrain Technologies LLP. All rights reserved.</p>
+  </footer>
+
+  <script>
+    const glow = document.getElementById('cursorGlow');
+
+    document.addEventListener('mousemove', (e) => {
+      glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+    });
+  </script>
+  <script>
+    const canvas = document.getElementById('neuronCanvas');
+    const ctx = canvas.getContext('2d');
+    let w, h;
+
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+        const neurons = Array.from({ length: 45 }, () => ({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      vx: (Math.random() - 0.5) * 0.25,
+      vy: (Math.random() - 0.5) * 0.25,
+      phase: Math.random() * Math.PI * 2
+    }));
+
+    function draw() {
+      ctx.clearRect(0, 0, w, h);
+
+            // Draw neurons (cell bodies)
+      neurons.forEach(n => {
+        n.x += n.vx + Math.sin(n.phase) * 0.05;
+        n.y += n.vy + Math.cos(n.phase) * 0.05;
+        n.phase += 0.01;
+
+        if (n.x < 0 || n.x > w) n.vx *= -1;
+        if (n.y < 0 || n.y > h) n.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(n.x, n.y, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(11,79,108,0.75)';
+        ctx.fill();
+      });
+
+      // Draw synaptic connections (organic spreading)
+      for (let i = 0; i < neurons.length; i++) {
+        for (let j = i + 1; j < neurons.length; j++) {
+          const dx = neurons[i].x - neurons[j].x;
+          const dy = neurons[i].y - neurons[j].y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          if (dist < 160) {
+            const alpha = Math.max(0, 0.18 - dist / 900);
+
+            ctx.beginPath();
+            ctx.moveTo(neurons[i].x, neurons[i].y);
+
+            // slight curve for organic feel
+            const cx = (neurons[i].x + neurons[j].x) / 2 + Math.sin(dist) * 8;
+            const cy = (neurons[i].y + neurons[j].y) / 2 + Math.cos(dist) * 8;
+
+            ctx.quadraticCurveTo(cx, cy, neurons[j].x, neurons[j].y);
+            ctx.strokeStyle = `rgba(11,79,108,${alpha})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            // synaptic pulse
+            if (Math.random() < 0.002) {
+              ctx.beginPath();
+              ctx.arc(cx, cy, 3, 0, Math.PI * 2);
+              ctx.fillStyle = 'rgba(11,79,108,0.5)';
+              ctx.fill();
+            }
+          }
+        }
+      }
+
+      requestAnimationFrame(draw);
+    }
+
+    draw();
+  </script>
+</body>
+</html>
